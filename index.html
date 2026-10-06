@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía LowRider v4 — Componentes, pasos, herramientas y modelos 3D</title>
+<meta name="description" content="Guía visual e interactiva para construir tu CNC LowRider v4: componentes, paso a paso, herramientas, piezas impresas, calculadora de medidas, visor 3D paramétrico y evaluación de la tabla de torsión.">
+<style>
+:root{
+  --bg:#0d1117; --bg2:#11161d; --card:#161d27; --card2:#1b2432;
+  --line:#26303f; --tx:#e6edf3; --tx2:#9aa7b5; --tx3:#6e7b8a;
+  --ac:#ff8a3d; --ac2:#4cc38a; --ac3:#58a6ff; --ac4:#d2a8ff; --warn:#f0b429; --bad:#f8616a;
+  --mono:'Cascadia Code',Consolas,'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;line-height:1.65;font-size:16px}
+a{color:var(--ac3);text-decoration:none} a:hover{text-decoration:underline}
+code,.mono{font-family:var(--mono);font-size:.9em}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+section{padding:56px 0;border-bottom:1px solid var(--line)}
+h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.15;letter-spacing:-.5px}
+h2{font-size:clamp(1.4rem,2.6vw,2rem);margin-bottom:8px;letter-spacing:-.3px}
+h3{font-size:1.15rem;margin:26px 0 10px;color:var(--tx)}
+h4{font-size:1rem;margin:18px 0 8px;color:var(--tx2)}
+p{margin:10px 0;color:var(--tx2)}
+p strong,li strong{color:var(--tx)}
+.lead{font-size:1.12rem;color:var(--tx2);max-width:60ch}
+.kicker{display:inline-block;font-family:var(--mono);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);margin-bottom:10px}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:.78rem;color:var(--tx2);margin:3px 4px 3px 0}
+.badge b{color:var(--tx)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.92rem}
+th{background:var(--card2);color:var(--tx);text-align:left;padding:9px 12px;border:1px solid var(--line);font-weight:600;white-space:nowrap}
+td{padding:8px 12px;border:1px solid var(--line);color:var(--tx2);vertical-align:top}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+td.num,th.num{text-align:right;font-family:var(--mono);white-space:nowrap}
+.tbl-scroll{overflow-x:auto;margin:14px 0}
+ul,ol{margin:10px 0 10px 24px;color:var(--tx2)} li{margin:5px 0}
+li::marker{color:var(--ac)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.card h4{margin-top:0}
+.stat{font-size:1.6rem;font-weight:700;color:var(--tx);font-family:var(--mono)}
+.stat small{font-size:.85rem;color:var(--tx3);font-weight:400}
+.note{border-left:3px solid var(--ac3);background:rgba(88,166,255,.07);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:.95rem}
+.note.warn{border-color:var(--warn);background:rgba(240,180,41,.07)}
+.note.bad{border-color:var(--bad);background:rgba(248,97,106,.07)}
+.note.good{border-color:var(--ac2);background:rgba(76,195,138,.07)}
+.note b{color:var(--tx)}
+/* header */
+header.hero{padding:84px 0 48px;background:
+  radial-gradient(1200px 500px at 70% -10%,rgba(255,138,61,.13),transparent),
+  radial-gradient(900px 420px at 10% 110%,rgba(88,166,255,.10),transparent),
+  var(--bg);border-bottom:1px solid var(--line)}
+.hero p.lead{margin-top:14px}
+.hero .badges{margin-top:18px}
+nav.top{position:sticky;top:0;z-index:50;background:rgba(13,17,23,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:2px;overflow-x:auto;padding:0 12px}
+nav.top a{padding:11px 12px;font-size:.82rem;color:var(--tx2);white-space:nowrap;border-bottom:2px solid transparent}
+nav.top a:hover{color:var(--tx);text-decoration:none;border-bottom-color:var(--ac)}
+/* viewer */
+.viewer-shell{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-top:18px}
+@media(max-width:900px){.viewer-shell{grid-template-columns:1fr}}
+#viewer3d{position:relative;background:var(--bg2);border:1px solid var(--line);border-radius:12px;height:560px;overflow:hidden;cursor:grab}
+#viewer3d:active{cursor:grabbing}
+#viewer3d canvas{display:block}
+.vlegend{position:absolute;left:12px;top:12px;background:rgba(13,17,23,.82);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.9}
+.vlegend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.vhint{position:absolute;right:12px;bottom:12px;background:rgba(13,17,23,.82);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:.72rem;color:var(--tx3)}
+.vpanel{display:flex;flex-direction:column;gap:12px}
+.vpanel .card{padding:14px 16px}
+label.fld{display:block;font-size:.78rem;color:var(--tx2);margin:8px 0 3px;font-family:var(--mono)}
+input[type=number],select{width:100%;background:var(--bg2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:.95rem}
+input[type=number]:focus,select:focus{outline:1px solid var(--ac)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 13px;font-size:.82rem;cursor:pointer;font-family:inherit}
+button:hover{border-color:var(--ac);color:#fff}
+button.primary{background:var(--ac);border-color:var(--ac);color:#1a1108;font-weight:600}
+button.primary:hover{filter:brightness(1.1)}
+button.on{border-color:var(--ac2);color:var(--ac2)}
+.vreadout{font-family:var(--mono);font-size:.8rem;color:var(--tx2);line-height:2}
+.vreadout b{color:var(--tx);font-weight:600}
+/* calculator */
+.calcbox{display:grid;grid-template-columns:340px 1fr;gap:16px;margin-top:16px}
+@media(max-width:900px){.calcbox{grid-template-columns:1fr}}
+.calc-out td b{font-family:var(--mono);color:var(--ac2)}
+.formula{background:var(--bg2);border:1px dashed var(--line);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:.8rem;color:var(--tx2);margin:10px 0;overflow-x:auto;white-space:pre}
+/* timeline pasos */
+.phase{display:grid;grid-template-columns:52px 1fr;gap:16px;margin:22px 0}
+.phase .n{width:52px;height:52px;border-radius:50%;background:var(--card);border:2px solid var(--ac);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:1.15rem;color:var(--ac)}
+.phase .n.done{border-color:var(--ac2);color:var(--ac2)}
+.phase h4{margin:6px 0 4px;font-size:1.05rem;color:var(--tx)}
+.phase .t{font-family:var(--mono);font-size:.75rem;color:var(--tx3)}
+/* score table */
+.score{display:flex;gap:6px}.score i{width:22px;height:8px;border-radius:3px;background:var(--line)}
+.score i.f{background:var(--ac2)}
+.embed{position:relative;width:100%;padding-bottom:56.25%;border-radius:12px;overflow:hidden;border:1px solid var(--line);margin:14px 0}
+.embed iframe{position:absolute;inset:0;width:100%;height:100%}
+svg.diagram{width:100%;height:auto;background:var(--bg2);border:1px solid var(--line);border-radius:12px;margin:14px 0}
+footer{padding:40px 0 60px;color:var(--tx3);font-size:.85rem}
+.tag{font-family:var(--mono);font-size:.72rem;padding:2px 8px;border-radius:6px;background:var(--card2);border:1px solid var(--line);color:var(--tx2);white-space:nowrap}
+.anchor{scroll-margin-top:60px}
+.split{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+.check{list-style:none;margin-left:0}
+.check li{padding-left:26px;position:relative}
+.check li::before{content:"✓";position:absolute;left:0;color:var(--ac2);font-weight:700}
+.cross li::before{content:"✗";color:var(--bad)}
+hr.sep{border:0;border-top:1px solid var(--line);margin:26px 0}
+.pill{font-family:var(--mono);font-size:.72rem;border-radius:6px;padding:2px 8px;display:inline-block;margin:2px 2px}
+.pill.ok{background:rgba(76,195,138,.12);color:var(--ac2);border:1px solid rgba(76,195,138,.3)}
+.pill.mid{background:rgba(240,180,41,.12);color:var(--warn);border:1px solid rgba(240,180,41,.3)}
+.pill.bad{background:rgba(248,97,106,.12);color:var(--bad);border:1px solid rgba(248,97,106,.3)}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="wrap">
+  <a href="#resumen">Resumen</a><a href="#visor3d">Visor 3D</a><a href="#calculadora">Calculadora</a>
+  <a href="#diagrama">Diagrama</a><a href="#tabla">Tabla de torsión</a><a href="#herramientas">Herramientas</a>
+  <a href="#materiales">Materiales</a><a href="#impresas">Piezas 3D</a><a href="#ajustes">Ajustar modelos</a>
+  <a href="#pasos">Paso a paso</a><a href="#electronica">Electrónica</a><a href="#calibracion">Calibración</a>
+  <a href="#seguridad">Seguridad</a><a href="#referencias">Referencias</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <span class="kicker">Guía no oficial · recopilación técnica</span>
+  <h1>Construye tu propia<br>CNC <span style="color:var(--ac)">LowRider v4</span></h1>
+  <p class="lead">Componentes, herramientas, piezas impresas, modelos 3D y cómo ajustarlos, el proceso completo paso a paso, y la evaluación técnica de la tabla de torsión del video — todo en una sola página interactiva, con calculadora oficial de medidas y visor 3D paramétrico.</p>
+  <div class="badges">
+    <span class="badge">💰 Kit completo ≈ <b>$650 USD</b> · autopiezas ≈ <b>$400+</b></span>
+    <span class="badge">📐 Área típica <b>1220×2440 mm</b> (4'×8')</span>
+    <span class="badge">🧵 Filamento ≈ <b>2.7 kg</b></span>
+    <span class="badge">🪚 Corta madera, espuma, plásticos y aluminio</span>
+    <span class="badge">⚖️ Diseño V1 Engineering · licencia CC BY-NC-SA 4.0</span>
+  </div>
+</div></header>
+
+<!-- ============ RESUMEN ============ -->
+<section id="resumen" class="anchor"><div class="wrap">
+  <span class="kicker">01 · Resumen</span>
+  <h2>¿Qué es la LowRider v4?</h2>
+  <p class="lead">Es la CNC de router de <b>V1 Engineering</b> que se monta <b>encima de tu mesa de trabajo</b>: cabalga sobre la superficie y sobre un único riel Y, así que puede mecanizar hojas completas (hasta 4'×8') o piezas pequeñas. Gran parte de sus piezas son impresas en 3D y los rieles son tubo de acero barato de ferretería, lo que la hace una de las CNC de plano completo más accesibles para construir uno mismo.</p>
+
+  <div class="grid g4" style="margin-top:22px">
+    <div class="card"><div class="stat">3</div><small>tubos de acero: <b>2 rieles X</b> (travesaño) + <b>1 riel Y</b> (centro de la mesa)</small></div>
+    <div class="card"><div class="stat">~35</div><small>piezas impresas en PLA (≈2.7 kg, sin soportes)</small></div>
+    <div class="card"><div class="stat">50<small> mm</small></div><small>de profundidad de corte Z (100 mm con mesa de caída)</small></div>
+    <div class="card"><div class="stat">$400–650</div><small>USD según imprimas o compres el kit (router y mesa aparte)</small></div>
+  </div>
+
+  <h3>Cómo está configurada la máquina</h3>
+  <ul>
+    <li><b>Eje X — el "travesaño" (beam):</b> dos tubos apilados uno sobre otro conectados por <b>placas strut</b> y separadores (<i>braces</i>) impresos. El <b>core</b> (carro con el router) viaja por estos tubos sobre rodamientos 608. El ancho del travesaño <b>siempre debe ser el eje más corto</b> de tu mesa.</li>
+    <li><b>Eje Y — un solo riel:</b> un tubo corre a lo largo del centro de la mesa, sujetado con <b>Y_Clips</b> cada ≤300 mm. Las placas verticales <b>YZ</b> (una por extremo del travesaño) llevan motores Y con <b>dos correas GT2 gemelas</b> ancladas a las esquinas de la mesa. La gracia del diseño: <i>"un solo riel Y mantiene la máquina correctamente restringida; dos rieles son extremadamente difíciles de alinear"</i>.</li>
+    <li><b>Eje Z:</b> dos motores con husillos T8 elevan el travesaño completo sobre <b>4 rieles lineales MGN12H</b>, montados en las placas YZ. Con <b>doble endstop</b> en Y la máquina se auto-cuadra.</li>
+    <li><b>Rigidez:</b> al revés de las CNC de pórtico tradicionales, es <b>más rígida cerca de la superficie</b> — mientras más profundo cortas, más rígida se vuelve.</li>
+    <li><b>Autofabricación:</b> la máquina se arma primero con <b>struts temporales impresos</b> y luego <b>se corta sus propias placas strut permanentes</b> (MDF/hardboard 6.35 mm).</li>
+  </ul>
+
+  <div class="note"><b>El video que usó tu compañero.</b> El canal <i>trailcurrentopensource</i> publicó <a href="https://www.youtube.com/watch?v=10SrEGDkLX0" target="_blank" rel="noopener">"I Built the LowRider V4 DIY CNC With the help of AI Agents"</a>: construyó la LR4 siguiendo las instrucciones de V1 Engineering y dejó que un agente de IA diseñara la <b>tabla de torsión</b> completa en FreeCAD, hasta dónde cae cada ranura. La evaluación completa de esa tabla está en la <a href="#tabla">sección 05</a>.</div>
+
+  <div class="note warn"><b>Materiales que corta:</b> espumas, maderas y plásticos con facilidad; aluminio y metales blandos sin problema para usuarios con experiencia; algunos usuarios incluso han mecanizado acero. Los rieles <b>nunca</b> de aluminio ni fibra de carbono — solo acero, acero inoxidable o DOM.</div>
+</div></section>
+
+<!-- ============ VISOR 3D ============ -->
+<section id="visor3d" class="anchor"><div class="wrap">
+  <span class="kicker">02 · Modelos en 3D</span>
+  <h2>Visor 3D paramétrico</h2>
+  <p class="lead">Un esquema 3D simplificado de la LowRider v4 que <b>se redimensiona con tus medidas</b>: cambia el área de corte y verás cómo cambian los tubos, la mesa, las correas y las placas — las mismas fórmulas de la <a href="https://docs.v1e.com/lowrider/calculator/" target="_blank" rel="noopener">calculadora oficial</a>. Arrastra para rotar, rueda para zoom, clic derecho para desplazar.</p>
+
+  <div class="viewer-shell">
+    <div id="viewer3d">
+      <div class="vlegend" id="vlegend">
+        <i style="background:#58a6ff"></i>Riel Y (1× tubo)<br>
+        <i style="background:#ff8a3d"></i>Rieles X (2× tubo, travesaño)<br>
+        <i style="background:#d2a8ff"></i>Braces + placas strut<br>
+        <i style="background:#e6edf3"></i>Placas YZ + ruedas<br>
+        <i style="background:#4cc38a"></i>Core (router)<br>
+        <i style="background:#8b949e"></i>Correas Y + esquineros<br>
+        <i style="background:#7d5a3c"></i>Mesa (tabla de torsión)
+      </div>
+      <div class="vhint">🖱️ arrastrar = rotar · rueda = zoom · clic der. = mover</div>
+      <span id="vstat" hidden></span>
+    </div>
+    <div class="vpanel">
+      <div class="card">
+        <h4 style="margin-top:0">Medidas (mm)</h4>
+        <label class="fld">Área de corte X (ancho)</label>
+        <input type="number" id="vx" value="1220" step="10" min="300" max="1600">
+        <label class="fld">Área de corte Y (largo)</label>
+        <input type="number" id="vy" value="2440" step="10" min="300" max="4000">
+        <label class="fld">Grosor placa XZ</label>
+        <input type="number" id="vt" value="6.5" step="0.1" min="3" max="10">
+        <div class="btnrow">
+          <button data-p="1220,2440">4'×8'</button>
+          <button data-p="1220,1220">4'×4'</button>
+          <button data-p="610,1220">2'×4'</button>
+        </div>
+        <div class="btnrow">
+          <button id="vbtnAnim">▶ Animar ejes</button>
+          <button id="vbtnRibs">◻ Interior mesa</button>
+          <button id="vbtnReset">⟲ Vista</button>
+        </div>
+      </div>
+      <div class="card vreadout" id="vreadout"></div>
+      <div class="note" style="font-size:.8rem;margin:0"><b>Aviso:</b> esquema didáctico no oficial (no es CAD de V1E). Para fabricar sigue siempre los <a href="https://docs.v1e.com/lowrider/" target="_blank" rel="noopener">planos oficiales</a> y las fotos de ensamblaje.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ CALCULADORA ============ -->
+<section id="calculadora" class="anchor"><div class="wrap">
+  <span class="kicker">03 · Dimensionado</span>
+  <h2>Calculadora oficial de medidas</h2>
+  <p class="lead">Réplica exacta de la calculadora de V1 Engineering (mismas fórmulas y redondeos de su <a href="https://github.com/V1EngineeringInc/V1EngineeringInc-Docs" target="_blank" rel="noopener">código fuente</a>): le das tu <b>área de corte útil</b> y te devuelve las longitudes de corte de tubos, correas, placas strut y el tamaño mínimo de mesa.</p>
+
+  <div class="calcbox">
+    <div class="card">
+      <h4 style="margin-top:0">Entradas</h4>
+      <div class="btnrow" style="margin:0 0 6px">
+        <label style="font-size:.85rem"><input type="radio" name="cunit" value="mm" checked onchange="unitSwitch()"> mm</label>&nbsp;&nbsp;
+        <label style="font-size:.85rem"><input type="radio" name="cunit" value="in" onchange="unitSwitch()"> pulgadas</label>
+      </div>
+      <label class="fld">Área de corte útil X <span class="cu">(mm)</span></label>
+      <input type="number" id="cx" value="1220" step="10" oninput="calcUpdate()">
+      <label class="fld">Área de corte útil Y <span class="cu">(mm)</span></label>
+      <input type="number" id="cy" value="2440" step="10" oninput="calcUpdate()">
+      <label class="fld">Grosor placa XZ <span class="cu">(mm)</span> — aluminio de tienda 6.5</label>
+      <input type="number" id="ct" value="6.5" step="0.1" oninput="calcUpdate()">
+      <div class="btnrow">
+        <button data-p="1220,2440,6.5" onclick="preset(this)">Hoja completa</button>
+        <button data-p="1220,1220,6.5" onclick="preset(this)">Media hoja</button>
+        <button data-p="610,1220,6.5" onclick="preset(this)">Cuarto</button>
+        <button onclick="calcReset()">⟲ Reset</button>
+      </div>
+      <div class="note" style="font-size:.82rem;margin-bottom:0">La salida de mesa es el <b>mínimo</b>: añade <b>25–50 mm por dimensión</b> si la pegarás a una pared o quieres proteger los portacorreas de las esquinas.</div>
+    </div>
+    <div>
+      <table class="calc-out tbl-scroll"><tbody>
+        <tr><th colspan="3" style="color:var(--ac3)">🔩 Tubos (rieles)</th></tr>
+        <tr><td>Riel X (travesaño)</td><td class="num"><b id="oxr">–</b></td><td class="num">× 2</td></tr>
+        <tr><td>Riel Y (centro de mesa)</td><td class="num"><b id="oyr">–</b></td><td class="num">× 1</td></tr>
+        <tr><th colspan="3" style="color:var(--ac2)">◌ Correas GT2 10 mm (abiertas, sin acero)</th></tr>
+        <tr><td>Correa eje X</td><td class="num"><b id="oxb">–</b></td><td class="num">× 1</td></tr>
+        <tr><td>Correa eje Y</td><td class="num"><b id="oyb">–</b></td><td class="num">× 2</td></tr>
+        <tr><td><b>Total correas</b></td><td class="num"><b id="obt">–</b></td><td></td></tr>
+        <tr><th colspan="3" style="color:var(--ac4)">▦ Placas strut (MDF/hardboard ≤6.35 mm)</th></tr>
+        <tr><td>Largo de strut</td><td class="num"><b id="ost">–</b></td><td class="num">× 2</td></tr>
+        <tr><th colspan="3" style="color:var(--warn)">▭ Mesa (mínimo)</th></tr>
+        <tr><td>Ancho mesa (X)</td><td class="num"><b id="oxt">–</b></td><td></td></tr>
+        <tr><td>Largo mesa (Y)</td><td class="num"><b id="oyt">–</b></td><td></td></tr>
+      </tbody></table>
+      <div class="formula" id="fx">—</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ DIAGRAMA ============ -->
+<section id="diagrama" class="anchor"><div class="wrap">
+  <span class="kicker">04 · Vista superior</span>
+  <h2>Diagrama de disposición</h2>
+  <p class="lead">Vista desde arriba de la máquina sobre su mesa, sincronizada con la calculadora. Observa cómo el <b>riel Y único</b> corre por el centro, las <b>dos correas Y</b> van a las esquinas y el <b>travesaño X</b> cruza el ancho corto.</p>
+  <svg class="diagram" id="topsvg" viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg"></svg>
+</div></section>
+
+<!-- ============ TABLA DE TORSION ============ -->
+<section id="tabla" class="anchor"><div class="wrap">
+  <span class="kicker">05 · La mesa del video</span>
+  <h2>Evaluación: la tabla de torsión diseñada por IA</h2>
+  <p class="lead">El video construye la LR4 con las instrucciones oficiales, pero la <b>mesa</b> —una tabla de torsión completa— la diseña un agente de IA en FreeCAD. Aquí va el análisis técnico de ese diseño, con los datos de la transcripción y del repositorio.</p>
+
+  <div class="embed"><iframe src="https://www.youtube-nocookie.com/embed/10SrEGDkLX0" title="I Built the LowRider V4 DIY CNC With the help of AI Agents" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+
+  <h3>¿Qué es una tabla de torsión y por qué la necesita tu LR4?</h3>
+  <p>Una <b>torsion box</b> es una cuadrícula de costillas (ribs) delgadas emparedadas entre dos pieles (skins). Funciona como una viga I gigante: las pieles absorben la compresión/tracción y la cuadrícula mantiene la separación, logrando una superficie <b>ligera, plana y resistente a la torsión</b> con materiales baratos — el complemento ideal para una CNC que cabalga sobre su propia mesa. Para la LR4 la mesa solo carga la máquina + material (no necesita ser robusta, sí <b>estable y plana</b>: es la referencia de todo tu corte).</p>
+
+  <h3>Lo que hizo el agente de IA (datos del video)</h3>
+  <div class="grid g3">
+    <div class="card"><h4>📐 Diseño</h4><ul class="check">
+      <li>Medió y rediseñó las <b>122 formas</b> del diseño</li>
+      <li>Rechazó el plan descargado: eliminó alas atornilladas y puso <b>12 costillas transversales de una sola pieza</b> de borde a borde — <i>"no hay junta donde el ala se une al núcleo"</i></li>
+      <li>Colocó una costilla bajo <b>cada costura de la piel</b>, sin que se lo pidieran</li>
+      <li>16 costillas largas + 12 transversales anidadas en 2 hojas</li>
+    </ul></div>
+    <div class="card"><h4>🔎 Verificación previa</h4><ul class="check">
+      <li>Verificó <b>108 pares de acoplamiento</b>: 0 solapamientos, 0 holgura máxima</li>
+      <li>Re-medición de <b>192 uniones de ranura</b> tras corregir: interferencia de 3 mm → 0</li>
+      <li>Anidó las piezas y generó los trayectos (~600 m de corte en la hoja 1, 3.25 h)</li>
+    </ul></div>
+    <div class="card"><h4>🏆 Resultado medido</h4><ul class="check">
+      <li>28 piezas · <b>1,200 m de corte total</b></li>
+      <li>Las 108 uniones asientan perfectas</li>
+      <li>Planicidad final: <b>~0.25 mm</b> en el peor punto a lo largo de 2.7 m (9 pies)</li>
+      <li>Soporta al constructor de pie a media luz</li>
+    </ul></div>
+  </div>
+
+  <h3>El error costoso (y la lección más valiosa del video)</h3>
+  <div class="note bad"><b>Qué pasó:</b> los cupones de prueba revelaron uniones paradas ~1/8" (3.2 mm) salientes, y los <b>10 círculos de alivio de esquina desaparecieron del trayecto</b> (0 de 10, todos desplazados 5.8 mm). <b>Causa raíz:</b> el círculo de alivio no era más grande que la fresa, así que el offset del CAM lo colapsó a un punto. <b>Corrección:</b> mover la geometría de alivio al lado de la máquina; tras el cambio, la re-medición de las 192 uniones dio 3 mm de interferencia antes → 0 después.</div>
+  <p><b>La lección:</b> el agente diseñó mejor de lo que el propio autor habría podido, pero el aporte humano decisivo fue <b>atrapar el error antes de cortar material</b> — con cupones de prueba (el job "Coupon" corta una costilla transversal + una larga para verificar el ajuste de ranura <i>antes</i> de la producción).</p>
+
+  <h3>Especificaciones del CAM (repo <span class="tag">TorsionTableCAD</span>)</h3>
+  <div class="tbl-scroll"><table>
+    <tr><th>Parámetro</th><th>Valor</th><th>Nota</th></tr>
+    <tr><td>Costillas</td><td>Tiras de 3" (76.2 mm)</td><td>de plywood ¾" (19.05 mm)</td></tr>
+    <tr><td>Material</td><td>2 hojas de 4×8 ft (1219×2438 mm)</td><td>12 transversales (hoja 1) + 8 largas-A + 8 largas-B (hoja 2)</td></tr>
+    <tr><td>Fresa</td><td>6.35 mm (¼") mono-afilada O-flute</td><td>ideal para madera/plywood</td></tr>
+    <tr><td>Husillo</td><td>12,000 RPM (dial en 2)</td><td>router Makita 700</td></tr>
+    <tr><td>Avances hoja 1</td><td class="num">3000 / 600 mm/min (XY/Z)</td><td>hoja con cupón + 12 costillas</td></tr>
+    <tr><td>Avances hoja 2</td><td class="num">4500 / 900 mm/min</td><td>16 costillas largas</td></tr>
+    <tr><td>Paso de corte (stepdown)</td><td class="num">2 mm</td><td>máximo probado por el autor</td></tr>
+    <tr><td>Almohadilla de corte (pad)</td><td class="num">2 mm</td><td>para cortar a través sin dañar la mesa</td></tr>
+    <tr><td>Separación entre piezas</td><td class="num">10 mm</td><td>gap de anidamiento</td></tr>
+    <tr><td>Varianza de superficie</td><td class="num">14 mm</td><td><b>medida en SU mesa</b> — re-mide la tuya y actualiza la hoja de parámetros</td></tr>
+    <tr><td>Jobs por hoja</td><td>SCORE → STOP → CUT</td><td>marcado superficial → pausa para tornillos → corte a fondo con dogbones</td></tr>
+  </table></div>
+  <p>Archivos: <span class="tag">lr4_cam.FCStd</span> (stock, herramientas, trayectos y hoja de parámetros — en el repo vía Git LFS) y <span class="tag">lr4_table_clean.FCStd</span> (modelo completo, ~180 MB, dentro de <code>TorsionTable.zip</code>, 169 MB). Requiere <b>FreeCAD 1.0+</b>: abre <code>lr4_cam.FCStd</b></code>, ajusta la hoja <b>CAM parameters</b>, recalcula, post-procesa cada job a G-code y <b>verifica los trayectos en el simulador antes de cortar</b>.</p>
+
+  <h3>Veredicto y recomendaciones si construyes la tuya</h3>
+  <div class="tbl-scroll"><table>
+    <tr><th>Criterio</th><th>Evaluación</th><th>Puntuación</th></tr>
+    <tr><td>Rigidez / planicidad lograda</td><td>~0.25 mm en 2.7 m y soporta peso corporal — de nivel profesional para CNC de este tamaño</td><td><span class="score"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span></td></tr>
+    <tr><td>Calidad del diseño (IA)</td><td>Costillas de una pieza sin juntas críticas + refuerzo bajo costuras: mejor que el plan humano original</td><td><span class="score"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span></td></tr>
+    <tr><td>Proceso verificación</td><td>108 pares + 192 uniones chequeados + cupones: metodología impecable</td><td><span class="score"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span></td></tr>
+    <tr><td>Robustez del CAM</td><td>El bug de los alivios (fresa ≥ Ø alivio) demostró que el G-code SIEMPRE se simula/verifica</td><td><span class="score"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></span></td></tr>
+    <tr><td>Corte sobre superficie irregular</td><td>Compensó 12–14 mm de varianza cortando más profundo, marcando contornos y atornillando dentro de las líneas (sin tabs): funciona, pero es parchar el problema</td><td><span class="score"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></span></td></tr>
+    <tr><td>Ajuste a la LR4</td><td>Pendiente: una hoja real de MDF ¾" mide 49×97", mayor que el recorrido del travesaño (~47–48") → requiere tubo X más largo, correas y struts nuevos</td><td><span class="score"><i class="f"></i><i class="f"></i><i></i><i></i><i></i></span></td></tr>
+  </table></div>
+  <div class="split">
+    <div class="card"><h4>✅ Hazlo así (lo que el video demuestra)</h4>
+      <ul class="check">
+        <li><b>Cupones de prueba siempre</b> antes de cortar las 2 hojas completas</li>
+        <li>Círculos de alivio <b>siempre mayores que el diámetro de la fresa</b> (regla: alivio ≥ Ø fresa + 1 mm)</li>
+        <li>Dogbones en todas las esquinas interiores para que las ranuras acepten costillas de canto vivo</li>
+        <li><b>Mide la varianza de TU superficie</b> y ponla en la hoja de parámetros (Z0 en el punto más alto)</li>
+        <li>Pega y atornilla con la tabla apoyada en superficie plana; deja curar el pegamento bajo peso uniforme</li>
+        <li>Diseña costillas de una pieza borde a borde (sin alas atornilladas) y refuerzo bajo cada costura de piel</li>
+      </ul>
+    </div>
+    <div class="card"><h4>⚠️ Cuidados y pendientes</h4>
+      <ul>
+        <li><b>Mide tu material real:</b> plywood/MDF "4×8" rara vez es nominal — el video se quedó corto de recorrido X por esto</li>
+        <li>Cortar sobre una mesa torcida exige sobre-corte: mide (14 mm en su caso) y actualiza el parámetro</li>
+        <li>Verifica cada toolpath en el simulador de FreeCAD: el agente "reportó éxito" con trayectos incompletos</li>
+        <li>3.25 h por hoja + ensamblado: presupuesta el tiempo y el desgaste de fresa</li>
+        <li>La LR4 necesita la mesa <b>más ancha que el área de corte</b> (usa la calculadora) y espacio para los Y_Clips del riel central</li>
+        <li>Alternativa oficial: planes paramétricos de mesa en el <a href="https://forum.v1e.com/tag/parametric-table" target="_blank" rel="noopener">foro V1E ($200–400)</a>, o una simple mesa 2×4 con tapa MDF/OSB para empezar</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ HERRAMIENTAS ============ -->
+<section id="herramientas" class="anchor"><div class="wrap">
+  <span class="kicker">06 · Herramientas</span>
+  <h2>Herramientas que necesitas</h2>
+  <div class="grid g3">
+    <div class="card"><h4>🖨️ Impresión 3D</h4>
+      <ul>
+        <li>Volumen mínimo de impresión <b>200×200×190 mm</b></li>
+        <li>Boquilla 0.4 mm; capa ≤ 80 % del nozzle (p. ej. 0.3 mm)</li>
+        <li><b>Calibración de skew</b> ( escuadra de carpintero + pieza alta, o Calilantern de Vector3D)</li>
+        <li>Slicer: PrusaSlicer/Repetier/Orca/Bambu probados; <b>Cura con precaución</b> (ver sección piezas)</li>
+        <li>Imprime primero <b>Z_Stub + Z_Nut</b> como prueba de ajuste</li>
+      </ul>
+    </div>
+    <div class="card"><h4>🔧 Taller</h4>
+      <ul>
+        <li><b>Solo herramientas manuales</b> para el ensamble — "las eléctricas solo te meten en líos"</li>
+        <li>Destornilladores, llaves (M3/M5/M8), allen para prisioneros</li>
+        <li>Taladro + brocas para pre-taladrar Y_Clips y portacorreas en la mesa</li>
+        <li>Cinta métrica, escuadra, lápiz bien sacado en punta (para marcar en agujeros profundos)</li>
+        <li>Pinzas/tweezers para correas; cortador de filamento</li>
+      </ul>
+    </div>
+    <div class="card"><h4>🪚 Corte y sujeción</h4>
+      <ul>
+        <li>Sierra cuadrada y lenta para cortar los tubos (cortes a escuadra y limpios)</li>
+        <li>Lima/lija para rebabas de tubo</li>
+        <li>Sujetadores/tornillos #8×½"+ (M4×12+) para fijar clips a la mesa</li>
+        <li>Fresas: ⅛" (3 mm) para struts y dogbones; ¼" mono-afilada O-flute para madera gruesa</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ MATERIALES ============ -->
+<section id="materiales" class="anchor"><div class="wrap">
+  <span class="kicker">07 · Lista de materiales</span>
+  <h2>BOM completo (build 4'×8')</h2>
+  <p class="lead">Para una máquina de 1220×2440 mm. Las cantidades de tornillería escalan con el tamaño. Puedes auto-abastecerte, comprar el <a href="https://www.v1e.com/products/lowrider-v4-hardware-kit" target="_blank" rel="noopener">kit de hardware V1E</a>, o la máquina completa en <a href="https://northwoodscustomcreations.com/" target="_blank" rel="noopener">North Woods Custom Creations</a>.</p>
+
+  <h3>🔩 Rieles (auto-abastecidos)</h3>
+  <div class="tbl-scroll"><table>
+    <tr><th>Cant.</th><th>Especificación</th><th>Notas</th></tr>
+    <tr><td class="num">2</td><td>Riel X — tubo de acero, largo según calculadora</td><td rowspan="2">OD 29.5 mm (1" EMT), 30 o 32 mm ±0.2 mm · pared ≥1.3 mm · acero, inox o DOM (⚠️ nunca aluminio ni fibra de carbono) · tubos de pared extra gruesa o macizos solo agregan masa y costo</td></tr>
+    <tr><td class="num">1</td><td>Riel Y — tubo igual, largo según calculadora</td></tr>
+  </table></div>
+  <p>En países sin conduit imperial: casas de metales, barras de closet o proveedores náuticos suelen tener tubo inox de 30–32 mm.</p>
+
+  <h3>⚙️ Partes especiales</h3>
+  <div class="tbl-scroll"><table>
+    <tr><th>Cant.</th><th>Descripción</th><th>Comentario</th></tr>
+    <tr><td class="num">1</td><td>Placa controladora</td><td>Mínimo 5 drivers · <b>Jackpot CNC recomendado</b> (también SKR Pro, etc.)</td></tr>
+    <tr><td class="num">5</td><td>Motores NEMA 17</td><td>Con eje de 20 mm o más</td></tr>
+    <tr><td class="num">3</td><td>Extensores de cable de stepper</td><td></td></tr>
+    <tr><td class="num">3</td><td>Poleas GT2 10 mm 16 dientes</td><td></td></tr>
+    <tr><td class="num">6</td><td>Tensores/loceros lisos 20T</td><td>Boquilla 5 mm</td></tr>
+    <tr><td class="num">~8 m</td><td>Correa GT2 abierta de 10 mm</td><td>Largo exacto con la calculadora · <b>sin núcleo de acero</b></td></tr>
+    <tr><td class="num">5</td><td>Endstops (interruptores de límite)</td><td>2 Y (auto-cuadrado) + 2 Z + 1 X</td></tr>
+    <tr><td class="num">14</td><td>Rulemanes 608-2RS</td><td></td></tr>
+    <tr><td class="num">2</td><td>Husillo T8 + tuerca</td><td>≥145 mm, 4 arranques, paso 2 mm (8 mm/vuelta)</td></tr>
+    <tr><td class="num">2</td><td>Acoplador 8→5 mm</td><td>Flexible</td></tr>
+    <tr><td class="num">4</td><td>Rieles lineales MGN12H</td><td>150 mm</td></tr>
+    <tr><td class="num">1</td><td>Fuente de alimentación</td><td>9–24 V según placa, ≥36 W (recomendado 24 V)</td></tr>
+    <tr><td class="num">1</td><td>Router</td><td><b>Makita serie 700</b> recomendado (~$120); monturas para DeWalt/Kobalt en Printables</td></tr>
+    <tr><td class="num">*</td><td>Fijador de roscas (threadlocker)</td><td>Para prisioneros de poleas</td></tr>
+    <tr><td class="num">*</td><td>Lubricante</td><td>Loceros y rieles lineales</td></tr>
+    <tr><td class="num">*</td><td>Manguera de aspiración 2.5" (70 mm)</td><td>Con costilla de acero · <b>debe conectarse a tierra</b></td></tr>
+  </table></div>
+
+  <h3>🔩 Tornillería (build 4'×8')</h3>
+  <div class="tbl-scroll"><table>
+    <tr><th>Cant.</th><th>Descripción</th><th>Equivalente EE.UU.</th></tr>
+    <tr><td class="num">14</td><td>Tornillo hexagonal M8×40</td><td>5/16"×1.5"</td></tr>
+    <tr><td class="num">14</td><td>Tuerca autoblocante M8</td><td>5/16"</td></tr>
+    <tr><td class="num">60</td><td>Tornillo de banco M5×30 cabeza botón</td><td>métrico obligatorio</td></tr>
+    <tr><td class="num">60</td><td>Tuerca autoblocante M5</td><td>—</td></tr>
+    <tr><td class="num">83</td><td>Tornillo M3×10 cabeza botón</td><td>métrico obligatorio</td></tr>
+    <tr><td class="num">10</td><td>Tornillo M2.5×12 cabeza botón</td><td>—</td></tr>
+    <tr><td class="num">18*</td><td>Tornillo M4×12+ madera/metal</td><td>#8×½"+ para fijar a la mesa (no viene en kit)</td></tr>
+  </table></div>
+
+  <h3>▦ Partes planas</h3>
+  <div class="tbl-scroll"><table>
+    <tr><th>Pieza</th><th>Material</th><th>Notas</th></tr>
+    <tr><td>Placas strut ×2 (permanentes)</td><td>MDF/hardboard/plástico ≤6.35 mm (¼")</td><td><b>La máquina se las corta a sí misma</b> con struts temporales impresos · plywood ¼" muy blando: evitar · genera el SVG con el <a href="https://vector76.github.io/Web_OpenSCAD_Customizer/strut_plate.html" target="_blank" rel="noopener">generador de Vector76</a></td></tr>
+    <tr><td>Placas XZ ×2</td><td>Aluminio o acero 6.35 mm</td><td>Conectan travesaño ↔ placas YZ · compra en <a href="https://www.v1e.com/products/lowrider-4-aluminium-xz-plates" target="_blank" rel="noopener">V1E</a>/<a href="https://hawiwe.de/produkt/aluminium-xz-platten/" target="_blank" rel="noopener">HaWiWe (UE)</a>, córtalas con el DXF, o usa las <a href="https://www.printables.com/model/1047962-printable-xz-plates-for-lowrider-4-consider-alu-in" target="_blank" rel="noopener">impresas</a> solo como temporales · si cambias el grosor, ajusta los 16 tornillos M3×10</td></tr>
+  </table></div>
+</div></section>
+
+<!-- ============ PIEZAS IMPRESAS ============ -->
+<section id="impresas" class="anchor"><div class="wrap">
+  <span class="kicker">08 · Impresión 3D</span>
+  <h2>Piezas impresas y sus ajustes</h2>
+  <div class="grid g4" style="margin-bottom:18px">
+    <div class="card"><div class="stat">PLA</div><small>recomendado para máxima rigidez; PET-GF/CF o PC-GF/CF si necesitas resistencia al calor</small></div>
+    <div class="card"><div class="stat">3<small> muros</small></div><small>relleno rectilíneo o cúbico según tabla</small></div>
+    <div class="card"><div class="stat">0<small> soportes</small></div><small>orientación por defecto, sin rotar</small></div>
+    <div class="card"><div class="stat">≤80<small>%</small></div><small>capa/nozzle — paredes empinadas deben cerrar bien</small></div>
+  </div>
+  <p>Archivos oficiales: <a href="https://www.printables.com/model/1034840-lowrider-4-cnc" target="_blank" rel="noopener">Printables</a> · <a href="https://www.thingiverse.com/thing:6907717" target="_blank" rel="noopener">Thingiverse</a> · <a href="https://makerworld.com/en/models/976448-lowrider-4-cnc" target="_blank" rel="noopener">MakerWorld</a>. Si un nombre tiene versión (V1, V2…), usa siempre la más alta. "###" = varios tamaños.</p>
+  <div class="note warn"><b>⚠️ Slicers basados en Cura:</b> puentean distinto. Verifica tras el slicing que los puentes internos de la <b>falda de polvo (Dust Skirt)</b> y la <b>placa YZ</b> crucen por el lado corto. PrusaSlicer/Repetier testeados. Mantén las partes orientadas como en las miniaturas de Printables.</div>
+  <div class="tbl-scroll"><table>
+    <tr><th>Cant.</th><th>Pieza</th><th>Relleno</th><th>Notas</th></tr>
+    <tr><td class="num">1</td><td>Core</td><td class="num">30%</td><td>carro principal — rodamientos sobre los tubos X</td></tr>
+    <tr><td class="num">1</td><td>YZ_Plate_Min</td><td class="num">25%</td><td rowspan="2">etiqueta cables: izquierda = Y0/Z0, derecha = Y1/Z1</td></tr>
+    <tr><td class="num">1</td><td>YZ_Plate_Max</td><td class="num">25%</td></tr>
+    <tr><td class="num">1</td><td>FrontWheel_Min / FrontWheel_Max</td><td class="num">20%</td><td>cabezas de tornillo hacia afuera o abajo</td></tr>
+    <tr><td class="num">1</td><td>BackWheel_Min / BackWheel_Max</td><td class="num">20%</td><td>caras al ras con la placa YZ (mesa derecha → pórtico cuadrado)</td></tr>
+    <tr><td class="num">1 c/u</td><td>Y_Belt_MinF / MinB / MaxF / MaxB</td><td class="num">30%</td><td>portacorreas Y</td></tr>
+    <tr><td class="num">1 c/u</td><td>Y_Belt_Min_Tension / Min_Lock / Max_Tension / Max_Lock</td><td class="num">30%</td><td>tensores y seguros de correa</td></tr>
+    <tr><td class="num">1 c/u</td><td>ZStop_Min / ZStop_Max</td><td class="num">30%</td><td>disparan justo antes de que los bloques toquen el tope superior</td></tr>
+    <tr><td class="num">2</td><td>Z_Nut</td><td class="num">30%</td><td>imprímelas primero como prueba de ajuste</td></tr>
+    <tr><td class="num">1 c/u</td><td>Z_Stub_Min / Z_Stub_Max</td><td class="num">30%</td><td>deben quedar ⊥ al husillo (si no, el Z traba)</td></tr>
+    <tr><td class="num">1</td><td>X_Belt</td><td class="num">30%</td><td>abrazadera de correa X en el core</td></tr>
+    <tr><td class="num">4–6</td><td>Brace_###</td><td class="num">30%</td><td>separadores del travesaño, distribuidos</td></tr>
+    <tr><td class="num">1+1</td><td>Brace_Max_### y un Brace_### extra</td><td class="num"><b>60%</b></td><td>braces de EXTREMOS — más rigidez</td></tr>
+    <tr><td class="num">1–2</td><td>Hose_Hook_##</td><td class="num">30%</td><td>según tu build</td></tr>
+    <tr><td class="num">1–2</td><td>Hose_Holder_Hook</td><td class="num">30%</td><td></td></tr>
+    <tr><td class="num">2</td><td>Hose_Holder_Shorty</td><td class="num">30%</td><td></td></tr>
+    <tr><td class="num">7–10</td><td>Y_Clip_###</td><td class="num">30%</td><td>máximo 300 mm entre centros</td></tr>
+    <tr><td class="num">4</td><td>Temp Strut</td><td class="num">15%</td><td>struts temporales para el primer corte</td></tr>
+    <tr><td class="num">1</td><td>Montura de herramienta (Makita/DeWalt/Kobalt)</td><td class="num">30%</td><td><a href="https://www.printables.com/@V1Engineering/collections/1752399" target="_blank" rel="noopener">colección oficial</a> · info en la descripción de cada pieza</td></tr>
+    <tr><td class="num">1</td><td>Caja de control (Board Box)</td><td class="num">20%</td><td><a href="https://www.printables.com/model/1434650-jackpot3-box" target="_blank" rel="noopener">Jackpot3</a> · <a href="https://www.printables.com/model/1051517-skr-pro-box-for-the-lowrider-4-cnc" target="_blank" rel="noopener">SKR Pro</a></td></tr>
+  </table></div>
+</div></section>
+
+<!-- ============ AJUSTAR MODELOS ============ -->
+<section id="ajustes" class="anchor"><div class="wrap">
+  <span class="kicker">09 · Parametrización</span>
+  <h2>Cómo ajustar los modelos 3D a tu build</h2>
+  <p class="lead">La LR4 no se "escala" en el slicer: se ajusta por <b>longitudes de corte</b> (tubos, correas, struts) mientras las piezas impresas son iguales para todos los tamaños. Esto es lo que se ajusta y con qué herramienta.</p>
+
+  <div class="grid g2">
+    <div class="card">
+      <h4 style="margin-top:0">1 · Longitudes (la calculadora)</h4>
+      <p>Todo el dimensionado sale de la <a href="#calculadora">calculadora oficial</a>: corta los tubos X e Y, las correas y las placas strut a esos largos. Es el único "parámetro" que casi todos los builds necesitan tocar.</p>
+      <h4>2 · Placas strut (el generador)</h4>
+      <p>Genera tus SVG con el <a href="https://vector76.github.io/Web_OpenSCAD_Customizer/strut_plate.html" target="_blank" rel="noopener">Strut Generator de Vector76</a>:</p>
+      <ul class="check">
+        <li><code>strut_length</code> = valor de la calculadora (el SVG sale 0.5 mm menor a propósito)</li>
+        <li><code>num_braces</code> = valor por defecto</li>
+        <li>dogbone = 3.5 para fresa de ⅛" (3 mm)</li>
+        <li>marca <b>front_plate</b> y <b>bottom_plate</b></li>
+        <li><code>front_wing_size</code> = 11.5 para EMT de 1" (o tu Ø de tubo)</li>
+        <li>Render (Ctrl+Enter) → descarga <code>strut_plate.svg</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">3 · Placas XZ</h4>
+      <p>Si usas material distinto de 6.35 mm, ajusta la longitud de los <b>16 tornillos M3×10</b>. Puedes cortarlas tú mismo con el DXF oficial o imprimir las temporales (solo para luego cortar las metálicas, y solo si ya tienes experiencia cortando aluminio en una V1).</p>
+      <h4>4 · Tamaño de braces y clips</h4>
+      <p><code>Brace_###</code>, <code>Y_Clip_###</code> y <code>Hose_Hook_##</code> vienen en varias longitudes: elige combinando el ancho total de braces que da la calculadora (los tubos no deben sobresalir de los braces).</p>
+      <h4>5 · Si diseñas tu propia tabla (FreeCAD + IA)</h4>
+      <p>El repo de TrailCurrent incluye dos herramientas que el autor del video usó o publicó:</p>
+      <ul>
+        <li><b>Utilities (plugin FreeCAD):</b> workbench con códigos QR, conectores Deutsch, envío a Bambu Studio/Blender y un <b>servidor MCP con 36 herramientas para controlar FreeCAD desde agentes de IA</b> (Claude Code). Instalación por Addon Manager; FreeCAD 0.21+ (probado en 1.0/1.1), licencia MIT.</li>
+        <li><b>TrailCurrentClaudeSkills:</b> skills de automatización — <code>freecad-automation</code> (modelos paramétricos, ensambles y jobs de CAM vía MCP, con modos de fallo "que reportan éxito sin producir nada"), <code>blender-automation</code> y <code>eezstudio</code>. Se copian a <code>~/.claude/skills/</code> o a <code>.claude/skills/</code> del proyecto.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ PASOS ============ -->
+<section id="pasos" class="anchor"><div class="wrap">
+  <span class="kicker">10 · Construcción</span>
+  <h2>El build paso a paso</h2>
+  <p class="lead">Resumen ejecutivo del orden oficial de ensamble (la guía con fotos paso a paso vive en <a href="https://docs.v1e.com/lowrider/" target="_blank" rel="noopener">docs.v1e.com/lowrider</a>). Regla de oro: <b>solo herramientas manuales</b>, ajustar "snug, sin aplastar" y relajarse — el foro responde cualquier duda.</p>
+
+  <div class="embed"><iframe src="https://www.youtube-nocookie.com/embed/KLDDJx-OUmQ" title="LowRider v4 — Core assembly (video oficial)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+
+  <div class="phase"><div class="n">1</div><div>
+    <h4>Imprimir y organizar</h4><span class="t">~2.7 kg de filamento</span>
+    <ul>
+      <li>Calibra skew de la impresora; imprime <b>Z_Stub + Z_Nut</b> y verifica que encajen con tuercas M5 antes de todo lo demás</li>
+      <li>Usa las tablas de relleno de la <a href="#impresas">sección 08</a>; braces de extremo al 60 %</li>
+      <li>Imprime los <b>4 Temp Strut</b> (15 %) — son el andamio temporal del travesaño</li>
+    </ul>
+  </div></div>
+
+  <div class="phase"><div class="n">2</div><div>
+    <h4>Core</h4><span class="t">rodamientos + montura de herramienta</span>
+    <ul>
+      <li>Los 608 caen en sus bolsillos; los pernos son ejes — ajusta solo lo necesario</li>
+      <li><b>Deja flojos los dos pernos superiores de tensión</b> hasta el ensamble final (controlan el agarre del core sobre los tubos X)</li>
+      <li>Fija las tuercas M5 de la montura con trozos de filamento; trama la herramienta si hace falta (cinta como shim)</li>
+      <li>Cableado: palpador (deja ≥140 mm libres), endstop X (palanca abajo), stepper X con polea (prisionero sobre el plano del eje primero + threadlocker), loceros girando libres</li>
+    </ul>
+  </div></div>
+
+  <div class="phase"><div class="n">3</div><div>
+    <h4>Placas YZ (Min y Max)</h4><span class="t">2 sub-ensambles gemelos</span>
+    <ul>
+      <li><b>Etiqueta todo los cables</b>: mirando la máquina, izquierda = Y0/Z0, derecha = Y1/Z1</li>
+      <li>Endstops Z: deben disparar justo antes de que los bloques choquen con el tope superior</li>
+      <li>Alisa la cama del riel MGN con el propio canto del riel (quita blob y asperezas)</li>
+      <li>Rieles MGN flojos → atornilla la placa XZ → aprieta moviéndola en todo el rango; luego afloja y reajusta cada bloque</li>
+      <li>Husillo T8 totalmente asentado en el acoplador; tuerca de latón en Z_Nut; stubs ⊥ al husillo o el Z traba</li>
+      <li>Ruedas traseras con cabezas afuera/abajo; pre-enrosca las autoblocantes; caras al ras</li>
+    </ul>
+  </div></div>
+
+  <div class="phase"><div class="n">4</div><div>
+    <h4>Travesaño (beam)</h4><span class="t">tubos X + braces + struts temporales</span>
+    <ul>
+      <li>Instala primero la tuerca del tensor de correa X</li>
+      <li>Braces de extremo (los de 60 %) en los extremos, resto repartido; los tubos <b>no</b> deben sobresalir de los braces (verifica ancho total contra la calculadora)</li>
+      <li>Struts temporales: "solo una pizca de tensión" — los rieles no cargan fuerzas laterales; si aprietas, solo causas problemas</li>
+    </ul>
+  </div></div>
+
+  <div class="phase"><div class="n">5</div><div>
+    <h4>Ensamble principal</h4><span class="t">YZ Max → core → YZ Min</span>
+    <ul>
+      <li>Atornilla YZ_Max al travesaño (3 tornillos, snug) → desliza el core sin enganchar cables → agrega YZ_Min</li>
+      <li>Revisa la <b>tensión de los dos pernos superiores del core</b>: flojo es mejor que romper; si notas que el core aprieta/afloja al pasar sobre los braces, afloja</li>
+      <li><b>El tubo X inferior no debe tocar ninguna placa XZ metálica</b> (si toca: problemas de conducción y elevación)</li>
+      <li>Nivela a grosso con los husillos Z; mide talón-punta frente y atrás en ambas placas YZ (iguales)</li>
+    </ul>
+  </div></div>
+
+  <div class="phase"><div class="n">6</div><div>
+    <h4>Cableado</h4><span class="t">la placa viaja en el travesaño</span>
+    <ul>
+      <li>Caja de control en el primer bahía del lado YZ_Min; la fuente se monta sobre la zona de strut tras el corte final</li>
+      <li>Pasa cables por el travesaño <b>con el haz a altura máxima</b> y verifica holgura en TODO el recorrido (sube/baja el beam)</li>
+      <li>Cinta las uniones de extensiones para quitar tensión; engancha cables y manguera a los braces con los Hose_Hook</li>
+      <li>Truco: una sola extensión eléctrica por el travesaño simplifica el manejo en Y y permite un SSR para encender el router (avanzado)</li>
+    </ul>
+  </div></div>
+
+  <div class="phase"><div class="n">7</div><div>
+    <h4>Montaje en la mesa + correas</h4><span class="t">riel Y, clips, tensión</span>
+    <ul>
+      <li>Riel Y <b>paralelo al borde</b> de la mesa — es TU referencia de alineación; clips y portacorreas comparten el borde exterior como referencia común</li>
+      <li>Pre-taladra; coloca portacorreas de las 4 esquinas y primer/último clip, reparte el resto ≤300 mm entre centros</li>
+      <li>Correas: lazo sobre tornillo M3, dientes sobrantes visibles; <b>3.2 kg (7 lb) de tensión</b> — "no vibra como guitarra"; flojo rompe menos que apretado</li>
+      <li>Tornillo de tope Y que dispare ~4 mm antes del choque</li>
+    </ul>
+  </div></div>
+
+  <div class="phase"><div class="n done">8</div><div>
+    <h4>Calibración y placas strut permanentes</h4><span class="t">donde la máquina se termina a sí misma</span>
+    <ul>
+      <li>Calibra pasos/mm, cuadrado (diagonales) y nivel Z — método completo en la <a href="#calibracion">sección 12</a></li>
+      <li>Corta las 2 placas strut permanentes (taladro helicoidal primero, contorno con tabs, profundidad ≥0.2 mm pasada el material)</li>
+      <li>Sustituye los Temp Struts; re-verifica talón-punta, endstop Y, cuadrado y nivel Z</li>
+      <li>Nivela tu superficie con una pasada de surfacing y ¡a cortar!</li>
+    </ul>
+  </div></div>
+</div></section>
+
+<!-- ============ ELECTRONICA ============ -->
+<section id="electronica" class="anchor"><div class="wrap">
+  <span class="kicker">11 · Control</span>
+  <h2>Electrónica y firmware</h2>
+  <div class="grid g2">
+    <div class="card">
+      <h4 style="margin-top:0">🧠 Controladora</h4>
+      <p>Cualquier placa de <b>5 drivers</b> funciona (2 Y + 2 Z + 1 X). La recomendación oficial es el <b><a href="https://www.v1e.com/products/jackpot3-cnc-controller" target="_blank" rel="noopener">Jackpot CNC Controller</a></b>, diseñado junto a la LR4: FluidNC, WiFi, excelente usabilidad. Alternativa habitual: <b>SKR Pro</b> con Marlin (usa la caja impresa correspondiente).</p>
+      <h4>⚡ Fuente</h4>
+      <p>9–24 V según placa, ≥36 W. Si vienes de 12 V, la recomendación oficial es <b>pasarte a 24 V</b>.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">💾 Firmware y software</h4>
+      <ul>
+        <li>Marlin, RepRap Firmware, GRBL, <b>FluidNC</b>, GRBLHal… casi todo funciona</li>
+        <li>Configuraciones preparadas y guía de cableado Jackpot en la <a href="https://docs.v1e.com/" target="_blank" rel="noopener">documentación V1E</a></li>
+        <li>Para CAM/Control: Estlcam, o el flujo FreeCAD → G-code como el del video</li>
+      </ul>
+      <h4>🌪️ Aspiración</h4>
+      <p>Manguera de 2.5" con costilla de acero, <b>conectada a tierra por un extremo</b> (usa el puerto de tierra de tu fuente). Sin tierra, la estática <b>destruye la electrónica</b>. Con manguera no conductiva: un cable pelado por dentro, fijo en un extremo y a tierra en el otro.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ CALIBRACION ============ -->
+<section id="calibracion" class="anchor"><div class="wrap">
+  <span class="kicker">12 · Precisión</span>
+  <h2>Calibración paso fino</h2>
+  <div class="grid g3">
+    <div class="card"><h4 style="margin-top:0">📏 Pasos/mm (correas)</h4>
+      <p>Mueve una distancia nominal (p. ej. 50 mm), mide la real y corrige:</p>
+      <div class="formula">nuevo_steps = (mandado / medido) × actual
+
+ejemplo de los docs:
+(2400 / 2394.2) × 50 = 50.121</div>
+      <p style="font-size:.85rem">Marca dos puntos, ordena un movimiento (p. ej. 50 mm), mide lo recorrido real con calibrador y aplica el factor a tus pasos/mm; repite hasta cerrar el error.</p>
+    </div>
+    <div class="card"><h4 style="margin-top:0">📐 Cuadrado (Y)</h4>
+      <p>Mide las <b>diagonales</b> del área de trabajo: diferencia &lt;1 mm está muy bien. Corrige el pulloff de Y (auto-cuadrado por doble endstop): configuración FluidNC del Jackpot o <code>M666</code> + <code>M500</code> en Marlin/SKR.</p>
+    </div>
+    <div class="card"><h4 style="margin-top:0">⬆️ Nivel Z</h4>
+      <p>El travesaño debe quedar paralelo a la mesa. Con el palpador, mide cada extremo del beam y ajusta el pulloff del lado más negativo (en FluidNC mantén ≥4 mm de pulloff). Bajo 0.1 mm de diferencia se logra fácil. Rehecho esto tras cambiar los struts, y si quieres perfección: pasa de surfacing sobre toda la mesa.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ SEGURIDAD ============ -->
+<section id="seguridad" class="anchor"><div class="wrap">
+  <span class="kicker">13 · Seguridad</span>
+  <h2>Antes de encender</h2>
+  <ul>
+    <li><b>Tierra en la manguera de aspiración:</b> la estática generada al aspirar polvo de madera <b>revienta la placa controladora</b>. Es la regla más violada y más cara.</li>
+    <li>El router es una <b>herramienta eléctrica de verdad</b>: gafas, protección auditiva, manga ajustada, y NUNCA dejes la máquina desatendida mientras corta.</li>
+    <li>Los <b>endstops son frágiles</b>: no dejes la palanquita colgando sobre bordes de mesa ni enganches cables con ella.</li>
+    <li>Aprieta "snug, sin aplastar": las piezas impresas se rompen mucho antes que la correa; "flojo es mejor que romper" (core, braces, ruedas).</li>
+    <li>Verifica los toolpaths en el simulador antes de cada corte (la lección del video: el software puede "reportar éxito" con trayectos incompletos).</li>
+    <li>Fijador de roscas en todos los prisioneros; primera pasada de cualquier archivo: al aire y vigilando aceleraciones.</li>
+  </ul>
+</div></section>
+
+<!-- ============ REFERENCIAS ============ -->
+<section id="referencias" class="anchor"><div class="wrap">
+  <span class="kicker">14 · Fuentes</span>
+  <h2>Referencias</h2>
+  <h3>Tus enlaces</h3>
+  <div class="tbl-scroll"><table>
+    <tr><th>Fuente</th><th>Qué aporta</th></tr>
+    <tr><td><a href="https://docs.google.com/document/d/1-wcM7TUUALrI8pb8iSPBQr6386aYvOvOIb87gadih0c/edit?usp=sharing" target="_blank" rel="noopener">📄 Documento de Google (transcripción del video)</a></td><td>Transcripción completa con marcas de tiempo del build y del diseño IA de la tabla</td></tr>
+    <tr><td><a href="https://www.youtube.com/watch?v=10SrEGDkLX0" target="_blank" rel="noopener">▶ YouTube — "I Built the LowRider V4 DIY CNC With the help of AI Agents"</a></td><td>El video fuente: construcción LR4 + tabla de torsión por agente IA</td></tr>
+    <tr><td><a href="https://trailcurrent.com/" target="_blank" rel="noopener">🌐 TrailCurrent.com</a></td><td>Sitio del autor (plataforma open-source para vehículos; el CNC fue un proyecto del canal)</td></tr>
+    <tr><td><a href="https://docs.v1e.com/lowrider/" target="_blank" rel="noopener">📚 Documentación oficial LowRider v4 (V1 Engineering)</a></td><td><b>La fuente de verdad</b>: BOM, impresión, ensamble foto a foto, calibración</td></tr>
+    <tr><td><a href="https://github.com/trailcurrentoss/YouTubeCodeSamples/releases/tag/torsion-table-release" target="_blank" rel="noopener">📦 GitHub — TorsionTable.zip (release)</a></td><td>Modelo completo (~180 MB) + jobs de CAM en FreeCAD de la tabla del video</td></tr>
+    <tr><td><a href="https://github.com/trailcurrentoss/Utilities-LogoFreeCADPlugin" target="_blank" rel="noopener">🔌 GitHub — Utilities-Logo FreeCAD Plugin</a></td><td>Workbench FreeCAD con servidor MCP (36 herramientas) para automatizar CAD con agentes de IA</td></tr>
+    <tr><td><a href="https://github.com/trailcurrentoss/TrailCurrentClaudeSkills" target="_blank" rel="noopener">🤖 GitHub — TrailCurrentClaudeSkills</a></td><td>Skills de automatización: freecad-automation (paramétrico + CAM), blender-automation, eezstudio</td></tr>
+  </table></div>
+  <h3>Complementos oficiales útiles</h3>
+  <ul>
+    <li><a href="https://docs.v1e.com/lowrider/calculator/" target="_blank" rel="noopener">Calculadora oficial LR4</a> (fórmulas replicadas en esta página) · <a href="https://vector76.github.io/Web_OpenSCAD_Customizer/strut_plate.html" target="_blank" rel="noopener">Strut Generator de Vector76</a></li>
+    <li>Piezas: <a href="https://www.printables.com/model/1034840-lowrider-4-cnc" target="_blank" rel="noopener">Printables</a> · <a href="https://www.thingiverse.com/thing:6907717" target="_blank" rel="noopener">Thingiverse</a> · <a href="https://makerworld.com/en/models/976448-lowrider-4-cnc" target="_blank" rel="noopener">MakerWorld</a></li>
+    <li>Videos oficiales de ensamble: <a href="https://www.youtube.com/watch?v=KLDDJx-OUmQ" target="_blank" rel="noopener">Core</a> · <a href="https://www.youtube.com/watch?v=p4FYVLI73Ss" target="_blank" rel="noopener">Placas YZ</a> · <a href="https://forum.v1e.com/t/lr4-how-many-hours-to-build-lr4/45641/1" target="_blank" rel="noopener">Hilos de horas reales de build (foro)</a></li>
+    <li>Tienda: <a href="https://www.v1e.com/collections/lowrider-parts" target="_blank" rel="noopener">V1E.com</a> · UE: <a href="https://hawiwe.de/" target="_blank" rel="noopener">HaWiWe</a> · Ensablada: <a href="https://northwoodscustomcreations.com/" target="_blank" rel="noopener">North Woods</a> · Planes de mesa: <a href="https://forum.v1e.com/tag/parametric-table" target="_blank" rel="noopener">tag/parametric-table</a></li>
+  </ul>
+</div></section>
+
+<footer><div class="wrap">
+  <p><b>Guía no oficial de recopilación.</b> El diseño LowRider CNC v4 es de <b>V1 Engineering Inc.</b> y sus archivos se liberan bajo <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>. El visor 3D y los diagramas de esta página son esquemas didácticos simplificados, no CAD oficial: antes de cortar o imprimir, verifica siempre contra la <a href="https://docs.v1e.com/lowrider/" target="_blank" rel="noopener">documentación oficial</a>. Las fórmulas de la calculadora provienen del código público de V1EngineeringInc-Docs. Construcción bajo tu propio riesgo: electricidad, herramientas de corte y agentes de IA incluidos. ⚡</p>
+  <p style="margin-top:10px">Hecho con las fuentes que recopilaste · octubre 2026</p>
+</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ================= CALCULADORA (fórmulas oficiales calculator.js V1E) ================= */
+const OFFS = {xrail_core:169, yrail_minus_work:255, ytable_minus_work:313, xbelt_extra:180, ybelt_extra:200, xtable_extra:110, xrail_cushion:3};
+const DEFAULTS = {x:1220, y:2440, t:6.5};
+const fmt = (v,u)=> u==='in' ? (Math.round(v*1000)/1000).toFixed(3)+'"' : Math.round(v)+' mm';
+const ru8 = v => Math.ceil(v*8)/8;           // redondeo oficial: arriba al 1/8
+function calcCore(xU,yU,t){                    // todo interno en mm
+  const xstrut = Math.ceil(xU + OFFS.xrail_core);
+  return {
+    xstrut,
+    xrails: xstrut - OFFS.xrail_cushion,
+    xbelts: xstrut + OFFS.xbelt_extra,
+    xtable: xstrut + 2*t + OFFS.xtable_extra,
+    yrail: yU + OFFS.yrail_minus_work,
+    ybelts: yU + OFFS.yrail_minus_work + OFFS.ybelt_extra,
+    ytable: yU + OFFS.ytable_minus_work
+  };
+}
+function beltTotal(c){ return c.xbelts + 2*c.ybelts; }
+function currentCalc(){
+  const u = document.querySelector('input[name=cunit]:checked').value;
+  const k = u==='in' ? 25.4 : 1;
+  const x = parseFloat(document.getElementById('cx').value)||DEFAULTS.x;
+  const y = parseFloat(document.getElementById('cy').value)||DEFAULTS.y;
+  const t = parseFloat(document.getElementById('ct').value)||DEFAULTS.t;
+  const c = calcCore(x*k, y*k, t*k);
+  const d = v => ru8(v/k);   // a unidades de display + redondeo oficial
+  return {u,c,d,x:x*k,y:y*k,t:t*k};
+}
+function calcUpdate(){
+  const {u,c,d} = currentCalc();
+  document.getElementById('oxr').textContent  = fmt(d(c.xrails),u);
+  document.getElementById('oyr').textContent  = fmt(d(c.yrail),u);
+  document.getElementById('oxb').textContent  = fmt(d(c.xbelts),u);
+  document.getElementById('oyb').textContent  = fmt(d(c.ybelts),u);
+  document.getElementById('obt').textContent  = fmt(d(beltTotal(c)),u);
+  document.getElementById('ost').textContent  = fmt(d(c.xstrut),u);
+  document.getElementById('oxt').textContent  = fmt(d(c.xtable),u);
+  document.getElementById('oyt').textContent  = fmt(d(c.ytable),u);
+  document.querySelectorAll('.cu').forEach(e=>e.textContent = u==='in'?'(in)':'(mm)');
+  document.getElementById('fx').textContent =
+`xstrut   = ⌈X + 169⌉            = ${Math.round(c.xstrut)} mm
+rieles X = xstrut − 3 (colchón)  = ${Math.round(c.xrails)} mm  ×2
+riel Y   = Y + 255               = ${Math.round(c.yrail)} mm
+correa X = xstrut + 180          = ${Math.round(c.xbelts)} mm
+correa Y = rielY + 200           = ${Math.round(c.ybelts)} mm  ×2
+mesa X   = xstrut + 2·grosorXZ + 110 = ${Math.round(c.xtable)} mm
+mesa Y   = Y + 313               = ${Math.round(c.ytable)} mm`;
+  drawTopDiagram();
+  syncViewerInputs();
+}
+let lastUnit='mm';
+function unitSwitch(){
+  const u=document.querySelector('input[name=cunit]:checked').value;
+  if(u!==lastUnit){
+    const k=u==='in'?1/25.4:25.4, dec=u==='in'?3:0;
+    ['cx','cy','ct'].forEach(id=>{
+      const el=document.getElementById(id), v=parseFloat(el.value);
+      if(!isNaN(v)) el.value=+(v*k).toFixed(dec);
+    });
+    lastUnit=u;
+  }
+  calcUpdate();
+}
+function preset(btn){
+  const [x,y,t] = btn.dataset.p.split(',').map(Number);
+  const u = document.querySelector('input[name=cunit]:checked').value;
+  const k = u==='in' ? 1/25.4 : 1;
+  document.getElementById('cx').value = Math.round(x*k*100)/100;
+  document.getElementById('cy').value = Math.round(y*k*100)/100;
+  document.getElementById('ct').value = Math.round(t*k*1000)/1000;
+  calcUpdate();
+}
+function calcReset(){
+  const u = document.querySelector('input[name=cunit]:checked').value;
+  const k = u==='in' ? 1/25.4 : 1;
+  document.getElementById('cx').value = Math.round(DEFAULTS.x*k*100)/100;
+  document.getElementById('cy').value = Math.round(DEFAULTS.y*k*100)/100;
+  document.getElementById('ct').value = Math.round(DEFAULTS.t*k*1000)/1000;
+  calcUpdate();
+}
+
+/* ================= DIAGRAMA SUPERIOR (SVG) ================= */
+function drawTopDiagram(){
+  const {c} = currentCalc();
+  const svg = document.getElementById('topsvg');
+  const W=1000,H=560, pad=70;
+  const sx = (W-2*pad)/c.xtable, sy=(H-2*pad)/c.ytable, s=Math.min(sx,sy);
+  const tw=c.xtable*s, tl=c.ytable*s, x0=(W-tw)/2, y0=(H-tl)/2;
+  const cxm=v=>x0+tw/2+v*s, cym=v=>y0+tl/2+v*s;
+  const beamY = c.ytable*0.28 - c.ytable/2;          // posición del pórtico a lo largo de Y
+  const beamW = c.xstrut*s;
+  const parts=[];
+  parts.push(`<rect x="${x0}" y="${y0}" width="${tw}" height="${tl}" fill="#1b2432" stroke="#7d5a3c" stroke-width="3" rx="4"/>`);
+  // costillas de torsión (interior)
+  const rib=300*s;
+  for(let yy=y0+rib; yy<y0+tl-10; yy+=Math.max(rib,40)) parts.push(`<line x1="${x0+6}" y1="${yy}" x2="${x0+tw-6}" y2="${yy}" stroke="#33405433" stroke-width="7"/>`);
+  for(let xx=x0+rib; xx<x0+tw-10; xx+=Math.max(rib,40)) parts.push(`<line x1="${xx}" y1="${y0+6}" x2="${xx}" y2="${y0+tl-6}" stroke="#33405433" stroke-width="7"/>`);
+  // riel Y central
+  parts.push(`<line x1="${cxm(0)}" y1="${y0+8}" x2="${cxm(0)}" y2="${y0+tl-8}" stroke="#58a6ff" stroke-width="6"/>`);
+  // Y clips
+  const ncl=Math.min(10,Math.max(4,Math.round(c.ytable/300)));
+  for(let i=1;i<ncl;i++){const yy=y0+tl*i/ncl; parts.push(`<rect x="${cxm(0)-9}" y="${yy-5}" width="18" height="10" fill="#58a6ff" opacity=".8"/>`);}
+  // correas Y a los lados
+  parts.push(`<line x1="${x0+14}" y1="${y0+14}" x2="${x0+14}" y2="${y0+tl-14}" stroke="#8b949e" stroke-width="3" stroke-dasharray="10 7"/>`);
+  parts.push(`<line x1="${x0+tw-14}" y1="${y0+14}" x2="${x0+tw-14}" y2="${y0+tl-14}" stroke="#8b949e" stroke-width="3" stroke-dasharray="10 7"/>`);
+  // portacorreas esquinas
+  [[x0+14,y0+14],[x0+tw-14,y0+14],[x0+14,y0+tl-14],[x0+tw-14,y0+tl-14]].forEach(p=>parts.push(`<rect x="${p[0]-10}" y="${p[1]-10}" width="20" height="20" fill="#8b949e" rx="3"/>`));
+  // travesaño (2 tubos)
+  const by=cym(beamY);
+  parts.push(`<rect x="${cxm(-c.xstrut/2)}" y="${by-16}" width="${beamW}" height="9" fill="#ff8a3d" rx="4"/>`);
+  parts.push(`<rect x="${cxm(-c.xstrut/2)}" y="${by+7}" width="${beamW}" height="9" fill="#ff8a3d" rx="4"/>`);
+  // braces + placas YZ en extremos
+  parts.push(`<rect x="${cxm(-c.xstrut/2)-4}" y="${by-24}" width="14" height="48" fill="#d2a8ff" rx="3"/>`);
+  parts.push(`<rect x="${cxm(c.xstrut/2)-10}" y="${by-24}" width="14" height="48" fill="#d2a8ff" rx="3"/>`);
+  parts.push(`<rect x="${cxm(-c.xstrut/2)+26}" y="${by-12}" width="10" height="24" fill="#d2a8ff" opacity=".7"/>`);
+  parts.push(`<rect x="${cxm(c.xstrut/2)-36}" y="${by-12}" width="10" height="24" fill="#d2a8ff" opacity=".7"/>`);
+  parts.push(`<rect x="${cxm(-40)}" y="${by-12}" width="10" height="24" fill="#d2a8ff" opacity=".7"/>`);
+  // core
+  parts.push(`<rect x="${cxm(-60)}" y="${by-22}" width="52" height="44" fill="#4cc38a" rx="5"/>`);
+  parts.push(`<circle cx="${cxm(-34)}" cy="${by}" r="7" fill="#0d1117" stroke="#4cc38a"/>`);
+  // etiquetas
+  const L=(x,y,t,fill,anchor)=>parts.push(`<text x="${x}" y="${y}" fill="${fill||'#9aa7b5'}" font-family="monospace" font-size="13" text-anchor="${anchor||'middle'}">${t}</text>`);
+  L(cxm(0), y0+26, 'riel Y (1 tubo, centro)', '#58a6ff');
+  L(x0+tw/2, by-34, `travesaño X — 2 tubos de ${Math.round(c.xrails)} mm`, '#ff8a3d');
+  L(cxm(-34), by+42, 'core (router)', '#4cc38a');
+  L(x0+14, y0+34, 'correa Y', '#8b949e','start');
+  L(x0+tw/2, y0+tl+28, `mesa mínima: ${Math.round(c.xtable)} × ${Math.round(c.ytable)} mm`, '#e6edf3');
+  L(x0+tw/2, y0-16, `área de corte útil: X × Y mm`, '#6e7b8a');
+  const {x,y} = currentCalc();
+  parts[parts.length-1] = `<text x="${x0+tw/2}" y="${y0-16}" fill="#6e7b8a" font-family="monospace" font-size="13" text-anchor="middle">área de corte útil: ${Math.round(x)} × ${Math.round(y)} mm</text>`;
+  // ejes
+  parts.push(`<g font-family="monospace" font-size="12" fill="#6e7b8a"><line x1="40" y1="60" x2="110" y2="60" stroke="#f8616a" stroke-width="2"/><text x="75" y="50" text-anchor="middle">X (ancho)</text><line x1="40" y1="60" x2="40" y2="130" stroke="#4cc38a" stroke-width="2"/><text x="30" y="100" text-anchor="end">Y</text></g>`);
+  svg.innerHTML = parts.join('');
+}
+
+/* ================= VISOR 3D ================= */
+let renderer,scene,camera,machineGroup,animOn=false,ribsOn=false,t0=performance.now();
+const V3 = {x:1220,y:2440,t:6.5,anim:null};
+function syncViewerInputs(){
+  const {x,y,t} = currentCalc();
+  V3.x=x; V3.y=y; V3.t=t;
+  const vx=document.getElementById('vx'),vy=document.getElementById('vy'),vt=document.getElementById('vt');
+  if(document.activeElement!==vx) vx.value=Math.round(x);
+  if(document.activeElement!==vy) vy.value=Math.round(y);
+  if(document.activeElement!==vt) vt.value=Math.round(t*10)/10;
+  const c=calcCore(x,y,t);
+  document.getElementById('vreadout').innerHTML =
+    `<b>📦 Lista de corte</b><br>rieles X ×2 — <b>${Math.round(c.xrails)} mm</b><br>riel Y ×1 — <b>${Math.round(c.yrail)} mm</b><br>`+
+    `correa X — <b>${Math.round(c.xbelts)} mm</b><br>correas Y ×2 — <b>${Math.round(c.ybelts)} mm</b><br>`+
+    `struts ×2 — <b>${Math.round(c.xstrut)} mm</b><br>mesa mínima — <b>${Math.round(c.xtable)}×${Math.round(c.ytable)} mm</b>`;
+  if(renderer) buildMachine();
+}
+function initViewer(){
+  const el=document.getElementById('viewer3d');
+  try{
+    renderer=new THREE.WebGLRenderer({antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.setSize(el.clientWidth,el.clientHeight);
+    el.insertBefore(renderer.domElement,el.firstChild);
+    scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x11161d);
+    scene.fog=new THREE.Fog(0x11161d, 6000, 16000);
+    camera=new THREE.PerspectiveCamera(42, el.clientWidth/el.clientHeight, 10, 40000);
+    // luces
+    scene.add(new THREE.AmbientLight(0xffffff,.55));
+    const d1=new THREE.DirectionalLight(0xffffff,.8); d1.position.set(1,2,1.5).multiplyScalar(3000); scene.add(d1);
+    const d2=new THREE.DirectionalLight(0x88aaff,.25); d2.position.set(-1,1,-2).multiplyScalar(3000); scene.add(d2);
+    machineGroup=new THREE.Group(); scene.add(machineGroup);
+    setupOrbit(el);
+    buildMachine();
+    window.addEventListener('resize',()=>{camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setSize(el.clientWidth,el.clientHeight);});
+    (function loop(){requestAnimationFrame(loop);renderFrame();})();
+  }catch(e){
+    el.insertAdjacentHTML('afterbegin','<div style="padding:20px;color:var(--tx2)">No se pudo iniciar el visor 3D (¿sin internet para three.js?). La calculadora y el diagrama siguen funcionando.</div>');
+  }
+}
+/* órbita propia */
+let cam={theta:0.9,phi:1.05,r:5200,cx:0,cy:0,cz:300};
+function setupOrbit(el){
+  let drag=false,pan=false,px=0,py=0;
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+  el.addEventListener('pointerdown',e=>{drag=true;pan=(e.button===2||e.shiftKey);px=e.clientX;py=e.clientY;el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-px,dy=e.clientY-py;px=e.clientX;py=e.clientY;
+    if(pan){const s=cam.r/900;cam.cx-= (Math.cos(cam.theta)*dx - Math.sin(cam.theta)*dy)*s; cam.cy-= (Math.sin(cam.theta)*dx + Math.cos(cam.theta)*dy)*s;}
+    else{cam.theta-=dx*0.005;cam.phi=Math.min(1.5,Math.max(0.12,cam.phi-dy*0.005));}});
+  el.addEventListener('pointerup',e=>{drag=false;});
+  el.addEventListener('wheel',e=>{e.preventDefault();cam.r=Math.min(22000,Math.max(1200,cam.r*(1+Math.sign(e.deltaY)*0.09)));},{passive:false});
+}
+function resetCam(){cam={theta:0.9,phi:1.05,r:Math.max(V3.x,V3.y)*2.1,cx:0,cy:0,cz:300};}
+function renderFrame(){
+  if(!renderer)return;
+  const sp=Math.cos(cam.phi), y=Math.sin(cam.phi)*cam.r;
+  camera.position.set(cam.cx+Math.cos(cam.theta)*sp*cam.r, y+cam.cz, cam.cy+Math.sin(cam.theta)*sp*cam.r);
+  camera.lookAt(cam.cx,cam.cz,cam.cy);
+  if(animOn && machineGroup){
+    const t=(performance.now()-t0)/1000;
+    const core=machineGroup.getObjectByName('core');
+    if(core){const X=core.userData.span; core.position.x=Math.sin(t*0.55)*X*0.92;}
+    const beam=machineGroup.getObjectByName('beamYZ');
+    if(beam){beam.position.z=V3.y*0.12+Math.sin(t*0.23)*V3.y*0.3; beam.position.y=22*Math.sin(t*0.9);}
+  }
+  renderer.render(scene,camera);
+  if(!renderFrame._t||performance.now()-renderFrame._t>800){renderFrame._t=performance.now();const d=document.getElementById('vstat');if(d)d.textContent=renderer.info.render.calls+'c/'+renderer.info.render.triangles+'t';}
+}
+const MAT={
+  railY:new THREE.MeshStandardMaterial({color:0x58a6ff,roughness:.35,metalness:.55}),
+  railX:new THREE.MeshStandardMaterial({color:0xff8a3d,roughness:.35,metalness:.55}),
+  brace:new THREE.MeshStandardMaterial({color:0xd2a8ff,roughness:.6}),
+  strut:new THREE.MeshStandardMaterial({color:0xb088f0,roughness:.7}),
+  yz:new THREE.MeshStandardMaterial({color:0xe6edf3,roughness:.55}),
+  xz:new THREE.MeshStandardMaterial({color:0x9aa7b5,roughness:.35,metalness:.6}),
+  core:new THREE.MeshStandardMaterial({color:0x4cc38a,roughness:.5}),
+  router:new THREE.MeshStandardMaterial({color:0x22272e,roughness:.4}),
+  belt:new THREE.MeshStandardMaterial({color:0x30363d,roughness:.9}),
+  wheel:new THREE.MeshStandardMaterial({color:0xf0b429,roughness:.5}),
+  table:new THREE.MeshStandardMaterial({color:0x7d5a3c,roughness:.85}),
+  ribs:new THREE.MeshStandardMaterial({color:0x9c7a52,roughness:.9}),
+  clip:new THREE.MeshStandardMaterial({color:0x58a6ff,roughness:.6}),
+  holder:new THREE.MeshStandardMaterial({color:0x8b949e,roughness:.5})
+};
+function cylZ(mat,r,len){const g=new THREE.CylinderGeometry(r,r,len,20);g.rotateZ(Math.PI/2);return new THREE.Mesh(g,mat);} // eje X
+function cylX(mat,r,len){const g=new THREE.CylinderGeometry(r,r,len,20);g.rotateX(Math.PI/2);return new THREE.Mesh(g,mat);} // eje Z (largo de mesa)
+function box(mat,x,y,z){return new THREE.Mesh(new THREE.BoxGeometry(x,y,z),mat);}
+function buildMachine(){
+  while(machineGroup.children.length)machineGroup.remove(machineGroup.children[0]);
+  const c=calcCore(V3.x,V3.y,V3.t);
+  const s=1; // mundo en mm
+  const XT=c.xtable*s, YT=c.ytable*s, XR=c.xrails*s, YR=c.yrail*s, ST=c.xstrut*s;
+  const R=15*s, H=100*s; // radio tubo, altura de trabajo
+  // MESA (torsión): piel inferior 0-10, costillas 10-90, piel superior 90-96
+  const tableG=new THREE.Group();
+  const skin=new THREE.Mesh(new THREE.BoxGeometry(XT,10*s,YT),MAT.table);skin.position.y=5*s;tableG.add(skin);
+  const top=new THREE.Mesh(new THREE.BoxGeometry(XT,6*s,YT),new THREE.MeshStandardMaterial({color:0x7d5a3c,roughness:.85,transparent:ribsOn,opacity:ribsOn?0.25:1}));
+  top.position.y=93*s;top.name='tabletop';tableG.add(top);
+  if(ribsOn){const t2=new THREE.Group();
+    for(let x=-XT/2+80*s;x<XT/2-40*s;x+=280*s){const b=box(MAT.ribs,70*s,80*s,YT-80*s);b.position.set(x,50*s,0);t2.add(b);}
+    for(let z=-YT/2+80*s;z<YT/2-40*s;z+=280*s){const b=box(MAT.ribs,XT-80*s,80*s,70*s);b.position.set(0,50*s,z);t2.add(b);}
+    t2.name='ribgrid';tableG.add(t2);}
+  machineGroup.add(tableG);
+  const TABLE_TOP=96*s;
+  // RIEL Y (centro)
+  const railY=cylX(MAT.railY,R,YR);railY.position.set(0,TABLE_TOP+R,0);railY.name='railY';machineGroup.add(railY);
+  // Y clips
+  const nclip=Math.max(3,Math.round(c.yrail/300));
+  for(let i=0;i<nclip;i++){const yy=-YR/2+(i+0.5)*(YR/nclip);const cl=box(MAT.clip,90*s,26*s,50*s);cl.position.set(0,TABLE_TOP+R,yy);machineGroup.add(cl);}
+  // GRUPO PÓRTICO (se anima en Y): beam 2 tubos X + braces + placas YZ + core
+  const beamYZ=new THREE.Group();beamYZ.name='beamYZ';
+  const zLow=TABLE_TOP+95*s, zHigh=zLow+H;
+  const t1=cylZ(MAT.railX,R,XR);t1.position.set(0,zLow,0);
+  const t2b=cylZ(MAT.railX,R,XR);t2b.position.set(0,zHigh,0);
+  beamYZ.add(t1,t2b);
+  // braces + struts
+  const nb=6;
+  for(let i=0;i<=nb;i++){
+    const xx=-ST/2+ (i===0? 30*s : (i===nb? ST-30*s : i*ST/nb));
+    const br=box(MAT.brace,26*s,H+60*s,80*s);br.position.set(xx,(zLow+zHigh)/2,0);beamYZ.add(br);
+    if(i>0&&i<nb){const st=box(MAT.strut,8*s,H,150*s);st.position.set(xx-40*s,(zLow+zHigh)/2,0);beamYZ.add(st);}
+  }
+  // placas YZ en extremos (con ruedas sobre la mesa + rieles MGN + XZ)
+  [-1,1].forEach(sd=>{
+    const px=sd*(ST/2-30*s);
+    const yz=box(MAT.yz,34*s,260*s,170*s);yz.position.set(px,zLow+130*s-R-20*s,0);beamYZ.add(yz);
+    // ruedas delanteras/traseras sobre la mesa
+    [1,-1].forEach(f=>{const w=cylZ(MAT.wheel,34*s,30*s);w.position.set(px,TABLE_TOP+34*s,f*95*s);beamYZ.add(w);});
+    // riel MGN + placa XZ (aluminio) hacia el travesaño
+    const mgn=box(MAT.xz,6*s,240*s,60*s);mgn.position.set(px-sd*20*s,zLow+120*s,55*s);beamYZ.add(mgn);
+    const xzp=box(MAT.xz,10*s,170*s,120*s);xzp.position.set(px-sd*26*s,zLow+95*s,0);beamYZ.add(xzp);
+    // motor Y con polea + correa hacia esquina
+  });
+  // CORE
+  const core=new THREE.Group();core.name='core';
+  const body=box(MAT.core,120*s,220*s,150*s);body.position.y=(zLow+zHigh)/2;core.add(body);
+  const router=new THREE.Mesh(new THREE.CylinderGeometry(45*s,45*s,150*s,20),MAT.router);router.position.set(0,zLow-60*s,60*s);core.add(router);
+  const bit=new THREE.Mesh(new THREE.CylinderGeometry(6*s,6*s,90*s,12),new THREE.MeshStandardMaterial({color:0xc9d1d9,metalness:.9,roughness:.2}));bit.position.set(0,zLow-160*s,60*s);core.add(bit);
+  core.userData.span=XR/2-90*s;
+  core.position.x=core.userData.span*0.35;
+  beamYZ.add(core);
+  beamYZ.position.z=YT*0.12;
+  machineGroup.add(beamYZ);
+  // CORREAS Y (a los lados) + esquineros
+  const belts=new THREE.Group();belts.name='belts';
+  [-1,1].forEach(sd=>{
+    const bl=box(MAT.belt,10*s,6*s,YT-70*s);bl.position.set(sd*(XT/2-28*s),TABLE_TOP+3*s,0);belts.add(bl);
+    [-1,1].forEach(e=>{const hd=box(MAT.holder,56*s,30*s,56*s);hd.position.set(sd*(XT/2-28*s),TABLE_TOP+10*s,e*(YT/2-35*s));belts.add(hd);});
+  });
+  belts.position.y=0;
+  machineGroup.add(belts);
+  // ejes (flechas)
+  const axes=new THREE.Group();
+  const mkArrow=(dir,color,len,lbl)=>{
+    const a=new THREE.Mesh(new THREE.ConeGeometry(26*s,70*s,10),new THREE.MeshBasicMaterial({color}));
+    const l=new THREE.Mesh(new THREE.CylinderGeometry(9*s,9*s,len,8),new THREE.MeshBasicMaterial({color}));
+    if(dir==='x'){a.rotation.z=-Math.PI/2;l.rotation.z=Math.PI/2;}
+    if(dir==='z'){a.rotation.x=Math.PI/2;}
+    const o=len/2+35*s;
+    a.position.set(dir==='x'?o:0,dir==='y'?o:0,dir==='z'?o:0);
+    l.position.set(dir==='x'?len/2:0,dir==='y'?len/2:0,dir==='z'?len/2:0);
+    const g=new THREE.Group();g.add(a,l);return g;
+  };
+  const axg=new THREE.Group();
+  const LX=600*s;
+  axg.add(mkArrow('x',0xf8616a,LX),mkArrow('y',0x4cc38a,LX),mkArrow('z',0x58a6ff,LX*0.6));
+  axg.position.set(-XT/2+40*s,TABLE_TOP+8*s,YT/2-40*s-LX);
+  machineGroup.add(axg);
+  if(cam.r<2000||cam.r>25000)resetCam();
+}
+/* controles visor */
+function viewerReadout(){
+  const c=calcCore(V3.x,V3.y,V3.t);
+  document.getElementById('vreadout').innerHTML =
+    `<b>📦 Lista de corte</b><br>rieles X ×2 — <b>${Math.round(c.xrails)} mm</b><br>riel Y ×1 — <b>${Math.round(c.yrail)} mm</b><br>`+
+    `correa X — <b>${Math.round(c.xbelts)} mm</b><br>correas Y ×2 — <b>${Math.round(c.ybelts)} mm</b><br>`+
+    `struts ×2 — <b>${Math.round(c.xstrut)} mm</b><br>mesa mínima — <b>${Math.round(c.xtable)}×${Math.round(c.ytable)} mm</b>`;
+}
+function viewerChanged(){viewerReadout();if(renderer)buildMachine();}
+document.getElementById('vx').addEventListener('input',()=>{V3.x=Math.max(300,Math.min(1600,parseFloat(document.getElementById('vx').value)||1220));viewerChanged();});
+document.getElementById('vy').addEventListener('input',()=>{V3.y=Math.max(300,Math.min(4000,parseFloat(document.getElementById('vy').value)||2440));viewerChanged();});
+document.getElementById('vt').addEventListener('input',()=>{V3.t=Math.max(3,Math.min(10,parseFloat(document.getElementById('vt').value)||6.5));viewerChanged();});
+document.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>{const[x,y]=b.dataset.p.split(',').map(Number);document.getElementById('vx').value=x;document.getElementById('vy').value=y;V3.x=x;V3.y=y;viewerChanged();}));
+document.getElementById('vbtnAnim').addEventListener('click',e=>{animOn=!animOn;e.target.textContent=animOn?'⏸ Pausar':'▶ Animar ejes';e.target.classList.toggle('on',animOn);});
+document.getElementById('vbtnRibs').addEventListener('click',e=>{ribsOn=!ribsOn;e.target.classList.toggle('on',ribsOn);buildMachine();});
+document.getElementById('vbtnReset').addEventListener('click',resetCam);
+
+/* init */
+calcUpdate();
+initViewer();
+</script>
+</body>
+</html>
